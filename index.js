@@ -1,4 +1,4 @@
-console.clear();
+iconsole.clear();
 
 const express = require("express");
 const morgan = require("morgan");
@@ -37,15 +37,31 @@ app.post("/submit", (req, res) => {
     description,
     images,
     virtualSkit,
+    to,
   } = req.body;
+  const head = `
+    <head>
+      <style>
+        img{
+          width: 100px;
+        }
+      </style>
+    </head>
+  `;
   const subs =
-    images?.map((image, id) => `#${id + 1} ===> ${image}`).join("<br/>") || "";
+    images
+      ?.map(
+        (image, id) =>
+          `#${id + 1} ===> <img src='${image}'></img> ===> ${image}`
+      )
+      .join("<br/>") || "";
 
   const mailOptions = {
     from: process.env.FROM_EMAIL,
-    to: process.env.TO_EMAIL,
+    to: to,
     subject: `cosplay submission of ${fullName}`,
     html: `
+    ${head}
     <h1>cosplay submission of ${fullName}</h1>
     <b>full name: </b> ${fullName}<br/>
     <b>artist name: </b> ${artistName}<br/>
@@ -68,7 +84,7 @@ app.post("/submit", (req, res) => {
       res.json({
         status: 200,
         message: "Ok",
-        data: info.response,
+        data: info,
       });
     }
   });
