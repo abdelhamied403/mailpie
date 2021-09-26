@@ -28,49 +28,19 @@ const transporter = nodemailer.createTransport({
 
 // routes
 app.post("/submit", (req, res) => {
-  const {
-    fullName,
-    artistName,
-    country,
-    email,
-    age,
-    description,
-    images,
-    virtualSkit,
-    to,
-  } = req.body;
-  const head = `
-    <head>
-      <style>
-        img{
-          width: 100px;
-        }
-      </style>
-    </head>
-  `;
-  const subs =
-    images
-      ?.map(
-        (image, id) =>
-          `#${id + 1} ===> <img src='${image}'></img> ===> ${image}`
-      )
-      .join("<br/>") || "";
+  const props = Object.entries(req.body);
+  let data = "";
+  props.forEach((prop) => {
+    data = data + `<b>${prop[0]}:</b> ${prop[1]} <br/>`;
+  });
 
   const mailOptions = {
     from: process.env.FROM_EMAIL,
-    to: to,
-    subject: `cosplay submission of ${fullName}`,
+    to: req.body.to,
+    subject: `${req.body.subject || `email from ${req.body.email}`}`,
     html: `
-    ${head}
-    <h1>cosplay submission of ${fullName}</h1>
-    <b>full name: </b> ${fullName}<br/>
-    <b>artist name: </b> ${artistName}<br/>
-    <b>email: </b> ${email}<br/>
-    <b>country: </b> ${country}<br/>
-    <b>age: </b> ${age}<br/>
-    <b>description: </b> ${description}<br/>
-    <b>images: </b><br/> ${subs}<br/>
-    <b>virtualSkit: </b> ${virtualSkit}<br/>
+    <h1>${req.body.subject || `email from ${req.body.email}`}</h1>
+    ${data}
     `,
   };
   transporter.sendMail(mailOptions, function (error, info) {
@@ -84,7 +54,7 @@ app.post("/submit", (req, res) => {
       res.json({
         status: 200,
         message: "Ok",
-        data: info,
+        data,
       });
     }
   });
